@@ -174,6 +174,10 @@ def memInfo():
 def networkInfo():
     return jsonify(networkCache.data)
 
+@app.route('/load_info')
+def loadInfo():
+    return jsonify(loadCache.data)
+
 # 背景线程 -------------------------------
 
 def cpuBackground(interval: int = 8) -> None:
@@ -218,6 +222,13 @@ def networkBackground(interval: int = 5) -> None:
         socketio.emit('update_net', data, broadcast=True)
     loopRun(task, interval)
 
+def loadBackground(interval: int = 5) -> None:
+    def task():
+        data: dict = systemInfo.GetLoadAverage()
+        loadCache.add(data)
+        socketio.emit('update_load', data, broadcast=True)
+    loopRun(task, interval)
+
 def loopRun(func, interval: int, *arg, **kwargs) -> None:
     '''
     循环执行
@@ -248,7 +259,8 @@ ts: list = [
       threading.Thread(target=cpuBackground),
       threading.Thread(target=ioBackground),
       threading.Thread(target=memBackground),
-      threading.Thread(target=networkBackground)
+      threading.Thread(target=networkBackground),
+      threading.Thread(target=loadBackground)
 ]
 
 # 获取cpu常量信息
@@ -259,6 +271,7 @@ cpuCache = Cache('cpuInfo')
 ioCache = Cache('ioInfo')
 memCache = Cache('memInfo')
 networkCache = Cache('networkInfo')
+loadCache = Cache('loadInfo')
 
 if __name__ == '__main__':
     # 开启所有线程
