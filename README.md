@@ -62,21 +62,33 @@ cpuInfo.json
 memInfo.json
 ioInfo.json
 networkInfo.json
+loadInfo.json
 ```
 这些文件的内容将会不断更新。
 
-您可以通过下列地址访问这些缓存：
+您可以通过下列地址访问这些系统信息的缓存：
 ```
 http://localhost:5678/cpu_constants
 http://localhost:5678/cpu_info
 http://localhost:5678/io_info
 http://localhost:5678/mem_info
 http://localhost:5678/network_info
+http://localhost:5678/load_info
 ```
 
 ## 测试socketio
 
-pending
+在网页建立一个socketio对象，连接到服务端
+socketio：https://socket.io/#examples
+
+以下是socketio的更新事件（event）：
+```
+update_cpu
+update_io
+update_mem
+update_net
+update_load
+```
 
 # Pure-Peace
 
