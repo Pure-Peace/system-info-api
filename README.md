@@ -24,6 +24,8 @@ systemInfo.py模块中包含所有可用的系统信息函数（所有api可以�
 当前提供windows x64下已安装依赖的虚拟环境（python3.8）：
 https://github.com/Pure-Peace/system-info-api/blob/master/venv_windows.zip
 
+![sc](https://github.com/Pure-Peace/system-info-api/blob/master/sc.png)
+
 将其解压到项目目录下，运行`run.bat`即可
 
 ## 非虚拟环境
@@ -39,6 +41,34 @@ pip install -r requirements.txt
 python main.py
 ```
 
+#### 运行后，访问地址
+```
+http://localhost:5678
+```
+
+即启动成功
+```
+{
+"message": "hello",
+"status": 1
+}
+```
+
+## [初次]运行后等待5-8秒，项目目录下将会出现缓存的json文件
+
+例如
+```
+cpuInfo.json
+memInfo.json
+ioInfo.json
+networkInfo.json
+```
+
+这些文件的内容将会不断更新。
+
+## 测试socketio
+
+pending
 
 # Pure-Peace
 
