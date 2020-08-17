@@ -78,6 +78,10 @@ http://localhost:5678/load_info
 
 ## 测试socketio
 
+打开python服务端后，用浏览器打开`socketio.html`
+
+![demo](https://github.com/Pure-Peace/system-info-api/blob/master/demo.png)
+
 在网页建立一个socketio对象，连接到服务端
 socketio：https://socket.io/#examples
 
