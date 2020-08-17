@@ -6,16 +6,16 @@
 '''
 
 import systemInfo
+from utils import log, getTime
 
 from gevent import monkey; monkey.patch_all()
 
 import threading
 import time
-import datetime
 import json
 
 from flask_socketio import SocketIO
-from flask import Flask, jsonify#, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 # fix: windows cmd cannot display colors
@@ -25,7 +25,7 @@ init(autoreset=True)
 
 # initial(s)
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'asdqwezxc'
+#app.config['SECRET_KEY'] = 'asdqwezxc'
 app.config.update(RESTFUL_JSON=dict(ensure_ascii=False))
 app.config["JSON_AS_ASCII"] = False
 
@@ -33,7 +33,7 @@ app.config["JSON_AS_ASCII"] = False
 CORS(app)
 
 socketio = SocketIO()
-socketio.init_app(app)
+socketio.init_app(app, cors_allowed_origins='*', async_mode='gevent')
 
 class Cache:
     def __init__(self, name: str, limit: int = 30):
@@ -105,49 +105,6 @@ class Cache:
             self.data = []
 
 
-
-def log(text: str, *args) -> None:
-    '''
-    logger，打印日志用，与print用法一致，但会显示时间
-
-    Parameters
-    ----------
-    text : str
-        DESCRIPTION.
-    *args : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    None
-        DESCRIPTION.
-
-    '''
-    print('[{}] {}'.format(getTime(1), text), *args)
-
-
-def getTime(needFormat: int = 0, formatMS: bool = True) -> [int, str]:
-    '''
-    获取当前时间
-
-    Parameters
-    ----------
-    needFormat : int, optional
-        需要格式化为2020年8月17日 20:01:40这样的字符串？. The default is 0.
-    formatMS : bool, optional
-        需要精确到毫秒吗？. The default is True.
-
-    Returns
-    -------
-    [int, str]
-        DESCRIPTION.
-
-    '''
-    if needFormat != 0:
-        return datetime.datetime.now().strftime(f'%Y-%m-%d %H:%M:%S{r".%f" if formatMS else ""}')
-    return int(str(time.time()).split('.')[0])
-
-
 # apis -------------------------------
 
 @app.route('/')
@@ -177,6 +134,16 @@ def networkInfo():
 @app.route('/load_info')
 def loadInfo():
     return jsonify(loadCache.data)
+
+# socketio -------------------------------
+
+@socketio.on('disconnect')
+def sioDisconnect():
+    log('socketio连接断开：', request.remote_addr)
+
+@socketio.on('connect')
+def sioConnect():
+    log('socketio连接建立：', request.remote_addr)
 
 # 背景线程 -------------------------------
 
@@ -251,8 +218,11 @@ def loopRun(func, interval: int, *arg, **kwargs) -> None:
 
     '''
     while True:
-        time.sleep(interval)
-        func(*arg, **kwargs)
+        try:
+            time.sleep(interval)
+            func(*arg, **kwargs)
+        except Exception as err:
+            log('循环线程执行异常：', err)
 
 # 线程列表
 ts: list = [
@@ -272,10 +242,11 @@ ioCache = Cache('ioInfo')
 memCache = Cache('memInfo')
 networkCache = Cache('networkInfo')
 loadCache = Cache('loadInfo')
-
+    
 if __name__ == '__main__':
     # 开启所有线程
     for t in ts: t.start()
-
+    
+    log('应用已启动')
     # 启动app（危险：0.0.0.0将使得外网可直接访问）
     socketio.run(app, host = '0.0.0.0', port = 5678)

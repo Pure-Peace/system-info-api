@@ -7,6 +7,7 @@
 '''
 
 from typing import List, Dict, Any
+from utils import log, getTime
 
 import os
 import time
@@ -56,8 +57,10 @@ class CpuConstants:
         None.
 
         '''
+        log('正在更新cpu常量...')
         if UNIX: self.GetCpuConstantsUnix(update)
         else: self.GetCpuConstantsWindows(update)
+        log('更新完毕！')
 
         self.initialed: bool = True
 
@@ -396,7 +399,7 @@ def GetDiskInfo() -> list:
         if UNIX: return GetDiskInfoUnix()
         return GetDiskInfoWindows()
     except Exception as err:
-        print('获取磁盘信息异常（unix: {}）：'.format(UNIX), err)
+        log('获取磁盘信息异常（unix: {}）：'.format(UNIX), err)
         return []
 
 
@@ -476,7 +479,7 @@ def GetDiskInfoUnix() -> list:
              arr['inodes'] = [inodes[1],inodes[2],inodes[3],inodes[4]]
              diskInfo.append(arr)
          except Exception as ex:
-             print('信息获取错误：', str(ex))
+             log('信息获取错误：', str(ex))
              continue
      return diskInfo
 
@@ -573,12 +576,12 @@ def ExecShellUnix(cmdstring: str, shell=True):
         if not err_f.closed: err_f.close()
         if not succ_f.closed: succ_f.close()
     except Exception as err:
-        print(err)
+        log(err)
     try:
         if type(a) == bytes: a = a.decode('utf-8')
         if type(e) == bytes: e = e.decode('utf-8')
     except Exception as err:
-        print(err)
+        log(err)
 
     return a,e
 
@@ -798,7 +801,7 @@ def GetSystemVersionWindows() -> str:
             osName, build, bit, platform.python_version())
         return version
     except Exception as ex:
-        print('获取系统版本失败，错误：' + str(ex))
+        log('获取系统版本失败，错误：' + str(ex))
         return '未知系统版本.'
 
 
@@ -825,7 +828,7 @@ def GetSystemVersionUnix() -> str:
         v = sys.version_info
         return version + '(Py {}.{}.{})'.format(v.major, v.minor, v.micro)
     except Exception as err:
-        print('获取系统版本失败，错误：', err)
+        log('获取系统版本失败，错误：', err)
         return '未知系统版本.'
 
 
@@ -885,10 +888,11 @@ def GetFullSystemData() -> dict:
     return systemData
 
 cpuConstants = CpuConstants()
+log('systemInfo 模块初始化完毕！')
 
 if __name__ == '__main__':
-    print(GetFullSystemData())
-    print(GetCpuConstants())
-    print(GetSystemInfo())
-    print(GetNetWork())
-    print(GetIoReadWrite())
+    log(GetFullSystemData())
+    log(GetCpuConstants())
+    log(GetSystemInfo())
+    log(GetNetWork())
+    log(GetIoReadWrite())
